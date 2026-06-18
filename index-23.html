@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>El Cronista Inmortal</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cronista">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:      #080a0f;
+    --surface: #0d1018;
+    --surface2:#111520;
+    --border:  #1a2035;
+    --gold:    #c9a84c;
+    --gold2:   #8b6914;
+    --jade:    #2d6e4e;
+    --jade2:   #1a4030;
+    --text:    #e8e0d0;
+    --muted:   #5a6070;
+    --faint:   #141820;
+    --red:     #8b1a1a;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 0 var(--gold2);
+  }
+
+  .logo {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--gold2);
+    background: radial-gradient(circle at 40% 35%, #1a2a1a, #080a0f);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 17px; color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .header-info { flex: 1; min-width: 0; }
+  .header-info h1 {
+    font-family: 'Cinzel', serif; font-size: 14px;
+    color: var(--gold); letter-spacing: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .header-info p { font-size: 10px; color: var(--muted); font-style: italic; }
+
+  .hdr-btns { display: flex; gap: 5px; flex-shrink: 0; }
+  .hdr-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 4px 8px; border-radius: 6px;
+    font-size: 10px; cursor: pointer; white-space: nowrap;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .hdr-btn:hover, .hdr-btn:active { border-color: var(--gold2); color: var(--gold); }
+
+  /* CONFIG BAR */
+  .config-bar {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 6px 14px; display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .config-bar label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .config-bar input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 4px 8px; border-radius: 6px;
+    font-size: 11px; font-family: 'Inter', sans-serif; outline: none;
+    min-width: 0;
+  }
+  .config-bar input:focus { border-color: var(--gold2); }
+  .btn-save {
+    background: var(--gold2); color: var(--text); border: none;
+    padding: 4px 10px; border-radius: 6px; font-size: 10px;
+    cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif;
+  }
+
+  /* WORKSPACE */
+  .workspace { flex: 1; display: flex; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 130px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; font-size: 10px;
+  }
+  .sidebar::-webkit-scrollbar { width: 2px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--faint); }
+
+  .sb-section {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sb-section h3 {
+    font-family: 'Cinzel', serif; font-size: 8px;
+    letter-spacing: 1.5px; color: var(--gold2);
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .sb-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .sb-label { color: var(--muted); }
+  .sb-val { color: var(--gold); font-family: 'Crimson Pro', serif; font-style: italic; text-align: right; max-width: 70px; }
+
+  .char-item {
+    background: var(--faint); border: 1px solid var(--border);
+    border-radius: 5px; padding: 4px 6px; margin-bottom: 4px; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .char-item:active { border-color: var(--gold2); }
+  .char-name { font-family: 'Cinzel', serif; font-size: 9px; color: var(--text); }
+  .char-role { font-size: 8px; color: var(--muted); margin-top: 1px; }
+
+  .skill-item { color: var(--gold); margin-bottom: 2px; font-size: 9px; }
+  .secta-item { margin-bottom: 6px; }
+  .secta-name { font-size: 9px; margin-bottom: 1px; }
+  .secta-desc { color: var(--muted); font-size: 8px; line-height: 1.4; }
+
+  /* CHAT */
+  .chat-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  #chat {
+    flex: 1; overflow-y: auto;
+    padding: 14px; display: flex; flex-direction: column; gap: 12px;
+  }
+  #chat::-webkit-scrollbar { width: 3px; }
+  #chat::-webkit-scrollbar-thumb { background: var(--faint); }
+
+  /* CHAPTER CARD */
+  .chapter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--gold2);
+    border-radius: 12px; overflow: hidden;
+  }
+
+  .ch-header {
+    padding: 8px 14px;
+    background: rgba(201,168,76,0.05);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ch-num {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 2px; color: var(--gold2); text-transform: uppercase;
+  }
+
+  .ch-title {
+    font-family: 'Cinzel', serif; font-size: 15px;
+    color: var(--gold); padding: 12px 14px 6px; letter-spacing: 0.5px;
+  }
+
+  /* EPIC IMAGE */
+  .epic-img-wrap {
+    margin: 8px 14px;
+    border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--faint);
+    position: relative;
+  }
+
+  .epic-img-wrap img {
+    width: 100%; display: block;
+    border-radius: 10px;
+  }
+
+  .img-loading {
+    padding: 30px 14px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    color: var(--muted); font-size: 11px; text-align: center;
+  }
+
+  .img-error {
+    padding: 14px;
+    color: var(--muted); font-size: 10px;
+    text-align: center; display: none;
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .img-caption {
+    padding: 6px 14px 10px;
+    font-family: 'Crimson Pro', serif; font-size: 11px;
+    font-style: italic; color: var(--gold2);
+  }
+
+  .ch-text {
+    padding: 0 14px 12px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px; line-height: 1.85;
+    color: var(--text); white-space: pre-wrap;
+  }
+
+  .ch-actions {
+    padding: 8px 14px 12px;
+    display: flex; gap: 7px; flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+  }
+  .ch-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 5px 10px; border-radius: 6px;
+    font-size: 11px; cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .ch-btn:active, .ch-btn:hover { border-color: var(--gold2); color: var(--gold); }
+  .ch-btn.primary { border-color: var(--gold2); color: var(--gold); }
+
+  /* MESSAGES */
+  .msg-user {
+    align-self: flex-end; max-width: 80%;
+    background: var(--faint); border: 1px solid var(--border);
+    border-radius: 12px; border-bottom-right-radius: 3px;
+    padding: 9px 13px; font-size: 14px; line-height: 1.6;
+  }
+
+  .msg-ai {
+    align-self: flex-start; max-width: 90%;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 2px solid var(--jade);
+    border-radius: 12px; border-top-left-radius: 3px;
+    padding: 9px 13px;
+    font-family: 'Crimson Pro', serif; font-size: 15px; line-height: 1.75;
+  }
+
+  .typing-row { display: flex; align-items: center; gap: 8px; align-self: flex-start; }
+  .typing-bubble {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 2px solid var(--jade);
+    border-radius: 12px; border-top-left-radius: 3px;
+    padding: 11px 16px; display: flex; gap: 5px; align-items: center;
+  }
+  .typing-bubble span {
+    width: 5px; height: 5px; background: var(--muted);
+    border-radius: 50%; animation: bounce 1.2s infinite;
+  }
+  .typing-bubble span:nth-child(2){animation-delay:.2s}
+  .typing-bubble span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-4px);opacity:1}}
+
+  .err-bubble {
+    align-self: flex-start;
+    background: rgba(139,26,26,0.1); border: 1px solid rgba(139,26,26,0.3);
+    color: #f87171; padding: 8px 12px; border-radius: 8px; font-size: 12px;
+  }
+
+  /* QUICK ACTIONS */
+  .quick-row {
+    padding: 7px 14px 8px;
+    display: flex; gap: 6px; overflow-x: auto; flex-shrink: 0;
+  }
+  .quick-row::-webkit-scrollbar { display: none; }
+
+  .q-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); padding: 5px 11px; border-radius: 20px;
+    font-size: 11px; cursor: pointer; white-space: nowrap;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .q-btn:active { border-color: var(--gold2); color: var(--gold); }
+  .q-btn.cta { border-color: var(--gold2); color: var(--gold); background: rgba(201,168,76,0.07); }
+
+  /* INPUT */
+  .input-row {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 10px 14px; display: flex; gap: 8px; align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  #userInput {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 12px; border-radius: 10px;
+    font-size: 14px; font-family: 'Inter', sans-serif;
+    resize: none; min-height: 40px; max-height: 100px;
+    outline: none; line-height: 1.5; transition: border-color 0.2s;
+  }
+  #userInput:focus { border-color: var(--gold2); }
+  #userInput::placeholder { color: var(--muted); }
+
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 10px;
+    border: none; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity 0.2s;
+  }
+  #sendBtn { background: var(--jade); color: var(--gold); }
+  #sendBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+  #voiceBtn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+  #voiceBtn.on { border-color: var(--jade); color: #4ade80; }
+
+  /* MODAL */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0; padding: 20px 18px;
+    width: 100%; max-height: 80vh; overflow-y: auto;
+  }
+  .modal h2 {
+    font-family: 'Cinzel', serif; font-size: 15px;
+    color: var(--gold); letter-spacing: 1px; margin-bottom: 14px;
+  }
+  .modal-section { margin-bottom: 14px; }
+  .modal-section h3 {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 1.5px; color: var(--gold2);
+    text-transform: uppercase; margin-bottom: 7px;
+  }
+  .modal-section p, .modal-section li {
+    font-family: 'Crimson Pro', serif; font-size: 15px;
+    color: var(--text); line-height: 1.7; margin-bottom: 4px;
+  }
+  .modal-close {
+    background: var(--faint); border: 1px solid var(--border);
+    color: var(--muted); padding: 8px 18px; border-radius: 8px;
+    font-size: 12px; cursor: pointer; width: 100%; margin-top: 6px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--jade); color: var(--gold);
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 12px; z-index: 999;
+    font-family: 'Inter', sans-serif;
+    animation: fadeup 0.3s ease;
+  }
+  @keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(10px); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">✦</div>
+  <div class="header-info">
+    <h1>El Cronista Inmortal</h1>
+    <p>La historia de Wei Rojo · Axis Reed</p>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" onclick="openModal('worldModal')">📜</button>
+    <button class="hdr-btn" onclick="openModal('memoryModal')">🧠</button>
+    <button class="hdr-btn" onclick="saveAll()">💾</button>
+  </div>
+</header>
+
+<div class="config-bar">
+  <label>API Key:</label>
+  <input type="password" id="apiKey" placeholder="AIza...">
+  <button class="btn-save" onclick="saveConfig()">OK</button>
+</div>
+
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <h3>Protagonista</h3>
+      <div class="sb-row"><span class="sb-label">Nombre</span><span class="sb-val">Wei Rojo</span></div>
+      <div class="sb-row"><span class="sb-label">Rango</span><span class="sb-val" id="sbRank">Mortal</span></div>
+      <div class="sb-row"><span class="sb-label">Cap.</span><span class="sb-val" id="sbChap">0</span></div>
+      <div class="sb-row"><span class="sb-label">Jade</span><span class="sb-val" id="sbJade">Dormido</span></div>
+    </div>
+
+    <div class="sb-section">
+      <h3>Personajes</h3>
+      <div class="char-item" onclick="ask('¿Cuál es el estado actual de Wei Rojo?')">
+        <div class="char-name">Wei Rojo</div>
+        <div class="char-role">Protagonista</div>
+      </div>
+      <div class="char-item" onclick="ask('¿Cómo va evolucionando Han Oscuro?')">
+        <div class="char-name">Han Oscuro</div>
+        <div class="char-role">Rival</div>
+      </div>
+      <div class="char-item" onclick="ask('¿Qué sabes de Ling Mei hasta ahora?')">
+        <div class="char-name">Ling Mei</div>
+        <div class="char-role">Amiga infancia</div>
+      </div>
+      <div class="char-item" onclick="ask('¿Cómo está evolucionando Bao?')">
+        <div class="char-name">Bao</div>
+        <div class="char-role">Amigo leal</div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <h3>Habilidades</h3>
+      <div id="sbSkills"><span style="color:var(--muted);font-size:9px;font-style:italic">Ninguna aún</span></div>
+    </div>
+
+    <div class="sb-section">
+      <h3>Sectas</h3>
+      <div class="secta-item">
+        <div class="secta-name" style="color:var(--gold2)">⚖ Viento Quieto</div>
+        <div class="secta-desc">Justa. Fría. Premia resultados.</div>
+      </div>
+      <div class="secta-item">
+        <div class="secta-name" style="color:#4ade80">☀ Luz Perpetua</div>
+        <div class="secta-desc">Heroica. Virtuosa.</div>
+      </div>
+      <div class="secta-item">
+        <div class="secta-name" style="color:#f87171">☠ Sombra Roja</div>
+        <div class="secta-desc">Oscura. Sin moral.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-panel">
+    <div id="chat"></div>
+
+    <div class="quick-row">
+      <button class="q-btn cta" onclick="nextChapter()">⚔ Siguiente capítulo</button>
+      <button class="q-btn" onclick="ask('Describe el estado actual de Wei Rojo y su familia')">👤 Estado</button>
+      <button class="q-btn" onclick="ask('¿Qué secretos guarda el jade negro?')">🟢 El Jade</button>
+      <button class="q-btn" onclick="ask('Escribe una escena de entrenamiento')">🏯 Entrena</button>
+      <button class="q-btn" onclick="ask('¿Cómo va Han Oscuro?')">⚡ Rival</button>
+    </div>
+
+    <div class="input-row">
+      <textarea id="userInput" placeholder="Habla con Axis Reed..." rows="1"></textarea>
+      <button class="icon-btn" id="voiceBtn" onclick="toggleVoice()">🔊</button>
+      <button class="icon-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORLD MODAL -->
+<div class="modal-bg" id="worldModal" onclick="closeModal('worldModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>El Mundo · Reglas de Hierro</h2>
+    <div class="modal-section">
+      <h3>Wei Rojo</h3>
+      <p>Joven gordito, pelirrojo, piel blanca manchada de carbón. Trabaja en las fraguas de la Secta del Viento Quieto. Padre muerto. Madre enferma y de carácter fuerte. Hermano mayor muy enfermo. Hermana pequeña con potencial oculto. Su arma más grande es su mente estratégica — también su mayor debilidad cuando se convierte en caos.</p>
+    </div>
+    <div class="modal-section">
+      <h3>El Jade Negro</h3>
+      <p>Encontrado entre las pertenencias de su padre muerto. Parece decorativo, sin valor. Le da claridad mental en momentos de crisis. Con el tiempo despertará conciencia propia. Destino final: el corazón de una espada forjada por Wei Rojo.</p>
+    </div>
+    <div class="modal-section">
+      <h3>Reglas Absolutas</h3>
+      <ul>
+        <li>Escala de poder consistente — nunca se rompe</li>
+        <li>Venganzas proporcionales, sin psicópatas</li>
+        <li>Máximo triángulo amoroso, termina con una</li>
+        <li>Sin harén, sin sistema mágico inventado</li>
+        <li>Habilidades con nombre épico en español</li>
+        <li>Mascota evoluciona lento hasta montura legendaria</li>
+        <li>Maestros progresivos — cada uno llega a su límite</li>
+      </ul>
+    </div>
+    <button class="modal-close" onclick="closeModal('worldModal')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MEMORY MODAL -->
+<div class="modal-bg" id="memoryModal" onclick="closeModal('memoryModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>Memoria · Archivo Vivo</h2>
+    <div id="memContent" style="font-family:'Crimson Pro',serif;font-size:15px;line-height:1.8;color:var(--text)"></div>
+    <button class="modal-close" onclick="closeModal('memoryModal')">Cerrar</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let apiKey = localStorage.getItem('cronista_key') || '';
+let shortHistory = []; // last 6 exchanges only
+
+let mem = JSON.parse(localStorage.getItem('cronista_mem') || JSON.stringify({
+  chapter: 0,
+  rank: 'Mortal',
+  jade: 'Dormido',
+  skills: [],
+  masters: [],
+  key_events: [],
+  relationships: {
+    ling_mei: 'amiga de infancia, se alejó por mayor talento, sigue siendo buena',
+    han_oscuro: 'rival, favorito de la secta, arrogante pero genuinamente capaz',
+    bao: 'amigo leal, parece tonto pero no lo es, evoluciona',
+    madre: 'enferma, carácter agresivo fuerte',
+    hermano: 'muy enfermo',
+    hermana: 'potencial oculto sin descubrir'
+  },
+  last_summary: 'La historia aún no ha comenzado.'
+}));
+
+if (apiKey) document.getElementById('apiKey').value = apiKey;
+updateSidebar();
+
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+function saveConfig() {
+  apiKey = document.getElementById('apiKey').value.trim();
+  localStorage.setItem('cronista_key', apiKey);
+  toast('✓ API Key guardada');
+}
+
+function saveAll() {
+  localStorage.setItem('cronista_mem', JSON.stringify(mem));
+  toast('✓ Historia guardada');
+}
+
+// ══════════════════════════════════════════════════════
+// SYSTEM PROMPT — COMPRESSED MEMORY
+// ══════════════════════════════════════════════════════
+function buildPrompt() {
+  return `Eres Axis Reed, cronista de la novela de cultivo "El Inmortal de Jade Negro". Escribes en español con nombres épicos en español para habilidades y rangos.
+
+ESTADO ACTUAL DE LA HISTORIA:
+- Capítulo: ${mem.chapter}
+- Rango de Wei Rojo: ${mem.rank}
+- Estado del Jade Negro: ${mem.jade}
+- Habilidades descubiertas: ${mem.skills.join(', ') || 'ninguna'}
+- Maestros: ${mem.masters.join(', ') || 'ninguno aún'}
+- Último resumen: ${mem.last_summary}
+- Eventos clave: ${mem.key_events.slice(-10).join(' | ') || 'ninguno'}
+
+PERSONAJES:
+- WEI ROJO: gordito, pelirrojo, piel blanca manchada de carbón. Trabaja en fraguas, rango más bajo. Padre muerto. Madre enferma y agresiva. Hermano mayor muy enfermo. Hermana pequeña con potencial oculto. Pensador estratégico — mente brillante y caótica.
+- HAN OSCURO: rival. Pelo negro azabache. Tuvo todas las facilidades y talento → arrogante pero no malvado. Genuinamente capaz.
+- LING MEI: amiga de infancia. Se alejó por su talento superior. En el fondo sigue siendo buena.
+- BAO: amigo leal. Parece tonto, no lo es. Evoluciona.
+
+EL JADE NEGRO: fragmento misterioso del padre muerto. Estado: ${mem.jade}. Destino: corazón de espada forjada por Wei Rojo.
+
+TRES SECTAS: Viento Quieto (gris/justa), Luz Perpetua (heroica), Sombra Roja (oscura).
+
+REGLAS ABSOLUTAS — JAMÁS ROMPER:
+1. Escala de poder consistente siempre
+2. Venganzas proporcionales, sin psicópatas
+3. Máximo triángulo amoroso, termina con una
+4. Cada habilidad tiene NOMBRE ÉPICO EN ESPAÑOL y costo real
+5. Mascota evoluciona lento hacia montura legendaria
+6. Maestros progresivos
+
+FORMATO CAPÍTULOS: Escribe prosa narrativa directa. Primera línea: título (ej: "El Primer Canto del Acero Negro"). Luego el capítulo completo. Mínimo 600 palabras. Ritmo para ser escuchado en voz alta. Al final añade una línea así: [RESUMEN: lo más importante en 2 líneas]
+
+Para conversación normal: texto libre sin marcadores especiales.`;
+}
+
+// ══════════════════════════════════════════════════════
+// GEMINI API
+// ══════════════════════════════════════════════════════
+async function callGemini(userMsg) {
+  if (!apiKey) throw new Error('Guarda tu API Key primero.');
+
+  const messages = [...shortHistory, { role: 'user', content: userMsg }];
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: buildPrompt() }] },
+        contents,
+        generationConfig: { temperature: 0.9, maxOutputTokens: 2048 }
+      })
+    }
+  );
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error?.message || `Error Gemini ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Respuesta vacía de Gemini');
+  return text;
+}
+
+// ══════════════════════════════════════════════════════
+// IMAGE — POLLINATIONS (free, no key needed)
+// ══════════════════════════════════════════════════════
+function buildImageUrl(title, chapterNum) {
+  const prompt = encodeURIComponent(
+    `xianxia wuxia fantasy art, ${title}, young red-haired chubby cultivator, dark jade stone glowing, Chinese fantasy painting style, dramatic cinematic lighting, epic atmosphere, no text, no watermark, highly detailed`
+  );
+  // Pollinations: free image generation API, no key needed
+  return `https://image.pollinations.ai/prompt/${prompt}?width=768&height=432&seed=${chapterNum * 137}&nologo=true&model=flux`;
+}
+
+// ══════════════════════════════════════════════════════
+// PARSE CHAPTER TEXT
+// ══════════════════════════════════════════════════════
+function parseChapter(raw, chNum) {
+  const lines = raw.trim().split('\n');
+
+  // Title: first non-empty line, cleaned
+  let titulo = lines.find(l => l.trim().length > 3) || `Capítulo ${chNum}`;
+  titulo = titulo.replace(/^#+\s*/, '').replace(/\*\*/g, '').replace(/^Capítulo\s+\d+[\s\-—:]*/i, '').trim();
+  if (!titulo) titulo = `Capítulo ${chNum}`;
+
+  // Body: everything after title
+  let texto = lines.slice(1).join('\n').trim();
+  // Clean markdown
+  texto = texto.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1').replace(/^#{1,3}\s+/gm, '').trim();
+
+  // Extract summary from [RESUMEN: ...]
+  let resumen = mem.last_summary;
+  const resMatch = raw.match(/\[RESUMEN:\s*([^\]]+)\]/i);
+  if (resMatch) {
+    resumen = resMatch[1].trim();
+    texto = texto.replace(/\[RESUMEN:[^\]]+\]/i, '').trim();
+  }
+
+  // Detect new skills
+  const skillRx = /((?:Técnica|Arte|Puño|Palma|Sello|Camino|Furia|Toque|Golpe|Viento|Llama|Trueno|Garra|Paso|Espíritu)\s+(?:del?|de la|de los)?\s*[A-ZÁÉÍÓÚÑ][a-záéíóúñ\s]{3,25})/g;
+  const newSkills = [...new Set((raw.match(skillRx) || []).map(s => s.trim()))].slice(0, 2);
+
+  // Detect jade activity
+  let jadeUpd = null;
+  if (/jade.{0,30}(calor|vibr|puls|susurr|brillo|lati|despert)/i.test(raw)) jadeUpd = 'Despertando';
+  if (/jade.{0,30}(habl|voz|conciencia|respond)/i.test(raw)) jadeUpd = 'Consciente';
+
+  // Detect rank up
+  let rankUpd = null;
+  const rankWords = ['condensación de qi', 'fundación espiritual', 'núcleo dorado', 'alma nascent', 'transformación espiritual', 'rompió el límite', 'avanzó de rango'];
+  if (rankWords.some(r => raw.toLowerCase().includes(r))) {
+    for (const r of rankWords) {
+      if (raw.toLowerCase().includes(r)) { rankUpd = r.split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join(' '); break; }
+    }
+  }
+
+  return { titulo, texto, resumen, newSkills, jadeUpd, rankUpd };
+}
+
+// ══════════════════════════════════════════════════════
+// NEXT CHAPTER
+// ══════════════════════════════════════════════════════
+async function nextChapter() {
+  if (!apiKey) { showErr('Guarda tu API Key primero.'); return; }
+  setBusy(true);
+
+  const chNum = mem.chapter + 1;
+  const prompt = chNum === 1
+    ? `Escribe el Capítulo 1 de la novela. Wei Rojo encuentra el jade negro entre las cosas de su padre muerto. Establece el mundo, la secta, la familia en crisis. Termina con él sosteniendo el jade por primera vez y sintiendo algo extraño. Primera línea debe ser el título épico del capítulo.`
+    : `Escribe el Capítulo ${chNum} continuando exactamente donde terminamos. Respeta todas las reglas. Primera línea: título épico del capítulo.`;
+
+  showTyping();
+
+  try {
+    const raw = await callGemini(prompt);
+
+    // Update short history
+    shortHistory.push({ role: 'user', content: prompt });
+    shortHistory.push({ role: 'assistant', content: raw });
+    if (shortHistory.length > 8) shortHistory = shortHistory.slice(-8);
+
+    const { titulo, texto, resumen, newSkills, jadeUpd, rankUpd } = parseChapter(raw, chNum);
+
+    // Update memory
+    mem.chapter = chNum;
+    mem.last_summary = resumen;
+    if (rankUpd) mem.rank = rankUpd;
+    if (jadeUpd) mem.jade = jadeUpd;
+    if (newSkills.length) mem.skills = [...new Set([...mem.skills, ...newSkills])];
+    mem.key_events = [...mem.key_events.slice(-19), `Cap.${chNum}: ${titulo}`];
+    localStorage.setItem('cronista_mem', JSON.stringify(mem));
+    updateSidebar();
+
+    removeTyping();
+    renderChapter(chNum, titulo, texto, newSkills);
+
+    // Auto-read if voice on
+    if (voiceOn) readText(texto);
+
+  } catch (err) {
+    removeTyping();
+    showErr(err.message);
+  }
+
+  setBusy(false);
+}
+
+function renderChapter(chNum, titulo, texto, newSkills) {
+  const chat = document.getElementById('chat');
+  const card = document.createElement('div');
+  card.className = 'chapter-card';
+
+  const imgId = `img-${chNum}-${Date.now()}`;
+
+  card.innerHTML = `
+    <div class="ch-header">
+      <span class="ch-num">Capítulo ${chNum}</span>
+      <span style="font-size:9px;color:var(--muted)">${new Date().toLocaleDateString('es-MX',{day:'numeric',month:'short'})}</span>
+    </div>
+    <div class="ch-title">${titulo}</div>
+    <div class="epic-img-wrap" id="wrap-${imgId}">
+      <div class="img-loading">
+        <div class="spinner"></div>
+        <span>Pintando el momento épico…</span>
+      </div>
+      <div class="img-error" id="err-${imgId}">Imagen no disponible</div>
+    </div>
+    ${newSkills.length ? `<div style="padding:4px 14px 6px;font-size:11px;color:var(--gold)">⚡ Nueva habilidad: ${newSkills.join(', ')}</div>` : ''}
+    <div class="ch-text">${texto}</div>
+    <div class="ch-actions">
+      <button class="ch-btn primary" onclick="nextChapter()">⚔ Siguiente</button>
+      <button class="ch-btn" id="readBtn-${imgId}" onclick="toggleRead(this, \`${texto.replace(/`/g,'\\`')}\`)">🔊 Escuchar</button>
+      <button class="ch-btn" onclick="copyText(this, \`${texto.replace(/`/g,'\\`')}\`, '${titulo.replace(/'/g,"\\'")}')">📋 Copiar</button>
+    </div>
+  `;
+
+  chat.appendChild(card);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Load image with Pollinations
+  const imgUrl = buildImageUrl(titulo, chNum);
+  const img = new Image();
+  img.onload = () => {
+    const wrap = document.getElementById(`wrap-${imgId}`);
+    if (!wrap) return;
+    wrap.innerHTML = `
+      <img src="${imgUrl}" alt="${titulo}" loading="lazy" />
+      <div class="img-caption">✦ ${titulo}</div>
+    `;
+    chat.scrollTop = chat.scrollHeight;
+  };
+  img.onerror = () => {
+    const wrap = document.getElementById(`wrap-${imgId}`);
+    if (wrap) wrap.style.display = 'none';
+  };
+  // Give it 20 seconds then hide
+  setTimeout(() => {
+    const wrap = document.getElementById(`wrap-${imgId}`);
+    if (wrap && wrap.querySelector('.img-loading')) wrap.style.display = 'none';
+  }, 20000);
+  img.src = imgUrl;
+}
+
+// ══════════════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════════════
+async function sendMsg() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text || !apiKey) { if (!apiKey) showErr('Guarda tu API Key.'); return; }
+
+  input.value = ''; input.style.height = 'auto';
+  setBusy(true);
+
+  addMsg('user', text);
+  showTyping();
+
+  try {
+    const reply = await callGemini(text);
+    shortHistory.push({ role: 'user', content: text });
+    shortHistory.push({ role: 'assistant', content: reply });
+    if (shortHistory.length > 8) shortHistory = shortHistory.slice(-8);
+    removeTyping();
+    addMsg('ai', reply);
+  } catch (err) {
+    removeTyping();
+    showErr(err.message);
+  }
+
+  setBusy(false);
+  input.focus();
+}
+
+function ask(text) {
+  document.getElementById('userInput').value = text;
+  sendMsg();
+}
+
+function addMsg(role, text) {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = role === 'user' ? 'msg-user' : 'msg-ai';
+  d.innerHTML = text.replace(/\n/g, '<br>');
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'typing-row'; d.id = 'typing';
+  d.innerHTML = `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function removeTyping() { document.getElementById('typing')?.remove(); }
+
+function showErr(msg) {
+  removeTyping();
+  const c = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'err-bubble'; d.textContent = '⚠ ' + msg;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function setBusy(b) {
+  document.getElementById('sendBtn').disabled = b;
+}
+
+// ══════════════════════════════════════════════════════
+// VOICE
+// ══════════════════════════════════════════════════════
+let voiceOn = false;
+let speaking = false;
+
+function toggleVoice() {
+  voiceOn = !voiceOn;
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.toggle('on', voiceOn);
+  btn.textContent = voiceOn ? '🔇' : '🔊';
+  if (!voiceOn) speechSynthesis.cancel();
+}
+
+function readText(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-MX'; u.rate = 0.9; u.pitch = 0.85;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang.startsWith('es') && /male/i.test(v.name)) || voices.find(v => v.lang.startsWith('es')) || voices[0];
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+
+function toggleRead(btn, text) {
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    btn.textContent = '🔊 Escuchar';
+  } else {
+    readText(text);
+    btn.textContent = '⏹ Detener';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════════
+function updateSidebar() {
+  document.getElementById('sbRank').textContent = mem.rank;
+  document.getElementById('sbChap').textContent = mem.chapter;
+  document.getElementById('sbJade').textContent = mem.jade;
+  const skillsEl = document.getElementById('sbSkills');
+  skillsEl.innerHTML = mem.skills.length
+    ? mem.skills.map(s => `<div class="skill-item">⚡ ${s}</div>`).join('')
+    : '<span style="color:var(--muted);font-size:9px;font-style:italic">Ninguna aún</span>';
+}
+
+// ══════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════
+function openModal(id) {
+  if (id === 'memoryModal') {
+    document.getElementById('memContent').innerHTML = `
+      <p><b style="color:var(--gold)">Capítulo:</b> ${mem.chapter}</p>
+      <p><b style="color:var(--gold)">Rango:</b> ${mem.rank}</p>
+      <p><b style="color:var(--gold)">Jade:</b> ${mem.jade}</p>
+      <p><b style="color:var(--gold)">Habilidades:</b> ${mem.skills.join(', ') || 'Ninguna'}</p>
+      <p><b style="color:var(--gold)">Maestros:</b> ${mem.masters.join(', ') || 'Ninguno aún'}</p>
+      <p style="margin-top:10px"><b style="color:var(--gold)">Último resumen:</b><br>${mem.last_summary}</p>
+      <p style="margin-top:10px"><b style="color:var(--gold)">Eventos recientes:</b></p>
+      ${mem.key_events.slice(-10).map(e => `<p>• ${e}</p>`).join('') || '<p>Ninguno aún.</p>'}
+    `;
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function copyText(btn, text, title) {
+  navigator.clipboard.writeText(title ? `${title}\n\n${text}` : text).then(() => {
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = '📋 Copiar', 2000);
+  });
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+document.getElementById('userInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+// ══════════════════════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ══════════════════════════════════════════════════════
+// WELCOME
+// ══════════════════════════════════════════════════════
+setTimeout(() => {
+  addMsg('ai', `El cielo sobre la Secta del Viento Quieto lleva tres días nublado.\n\nYo, Axis Reed, he sido convocado para narrar esta historia. La de un joven pelirrojo que trabaja en las fraguas y que hoy, entre las cosas de su padre muerto, encontrará algo que el destino llevaba años preparando.\n\n¿Comenzamos el Capítulo 1?`);
+}, 400);
+</script>
+</body>
+</html>
